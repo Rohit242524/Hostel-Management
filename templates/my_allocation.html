@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Allocation</title>
+</head>
+<body>
+  <h2>My Room Allocation</h2>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <p class="{{ category }}">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if allocation %}
+    <p><strong>Room Number:</strong> {{ allocation['room_number'] }}</p>
+    <p><strong>Status:</strong> {{ allocation['status'] }}</p>
+    <p><strong>Booking Date:</strong> {{ allocation['booking_date'] }}</p>
+  {% else %}
+    <p class="no-data">No room allocated yet. Please wait for admin approval or submit a booking request.</p>
+    <p><a href="#" onclick="loadSection('book_room')">Book a Room</a></p>
+  {% endif %}
+</body>
+</html>

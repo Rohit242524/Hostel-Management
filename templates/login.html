@@ -7,10 +7,14 @@
 <body>
   <div class="login-container">
     <h2>Hostel Login</h2>
-    <form method="POST" action="{{ url_for('login') }}">
-      {% if error %}
-        <p class="error">{{ error }}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <p class="error" style="color: red;">{{ message }}</p>
+        {% endfor %}
       {% endif %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('login') }}">
       <select name="user_type">
         <option value="student">Student</option>
         <option value="admin">Admin</option>
@@ -21,6 +25,5 @@
     </form>
     <p>New Student? <a href="{{ url_for('register_student') }}">Register here</a></p>
   </div>
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

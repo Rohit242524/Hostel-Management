@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Students</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <h2>Students</h2>
+  <ul>
+  {% for student in students %}
+    <li>Roll No: {{ student['student_id'] }} - {{ student['username'] }} - {{ student['name'] }} ({{ student['email'] }})</li>
+  {% endfor %}
+  </ul>
+  <p><a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a></p>
+</body>
+</html>
