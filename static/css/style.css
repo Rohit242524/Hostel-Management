@@ -1,0 +1,178 @@
+/* ---------- Global Styles ---------- */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #eef;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Header ---------- */
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- Login Container ---------- */
+.login-container {
+  width: 400px;
+  margin: 100px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+input, select {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ---------- Buttons ---------- */
+button, .btn {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+button:hover, .btn:hover {
+  background-color: #2980b9;
+}
+
+.btn.logout {
+  background-color: #dc3545;
+}
+
+.btn.logout:hover {
+  background-color: #a71d2a;
+}
+
+/* ---------- Error Message ---------- */
+.error {
+  color: red;
+}
+
+/* ---------- Dashboard Tabs ---------- */
+.nav-tabs {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  padding: 0;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.nav-tabs li {
+  cursor: pointer;
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 6px;
+  user-select: none;
+  transition: background-color 0.3s;
+}
+
+.nav-tabs li.active,
+.nav-tabs li:hover {
+  background-color: #2980b9;
+}
+
+/* ---------- Tab Sections ---------- */
+.dashboard-section {
+  display: none;
+  margin-top: 20px;
+}
+
+.dashboard-section.active {
+  display: block;
+}
+
+/* ---------- Card-Based Dashboard ---------- */
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: white;
+  width: 300px;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: #343a40;
+}
+
+.card p {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: sans-serif;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #3498db;
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar ul li {
+  padding: 12px;
+  margin: 10px 0;
+  background-color: #2980b9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar ul li:hover {
+  background-color: #1f5f8b;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 30px;
+  background-color: #f5f5f5;
+}

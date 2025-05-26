@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Room</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .requested-btn {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+        }
+        .book-btn {
+            background-color: green;
+            color: white;
+        }
+        table {
+            width: 60%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #999;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Available Rooms</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul style="width: 60%; margin: auto; padding: 0;">
+        {% for category, message in messages %}
+          <li style="color: {% if category == 'success' %}green{% else %}red{% endif %}; text-align: center; list-style: none; margin-bottom: 10px;">
+            {{ message }}
+          </li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Room No</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for room in rooms %}
+            <tr>
+                <td>{{ room['room_number'] }}</td>
+                <td>{{ room['capacity'] }}</td>
+                <td>{{ room['status'] }}</td>
+                <td>
+                    {% if already_requested %}
+                        <button class="requested-btn" disabled>Request Sent</button>
+                    {% else %}
+                        <form method="post" action="/student_section/book_room" style="display:inline;">
+                            <input type="hidden" name="room_id" value="{{ room['id'] }}">
+                            <button type="submit" class="book-btn">Request to Book</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
