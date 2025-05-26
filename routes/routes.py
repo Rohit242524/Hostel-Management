@@ -105,14 +105,27 @@ def setup_routes(app):
     @app.route('/view_bookings')
     def view_bookings():
         with get_db() as conn:
-            bookings = conn.execute('''
+            pending_bookings = conn.execute('''
                 SELECT b.id, b.student_id, s.student_id AS roll_number, s.name, r.room_number, b.status, b.booking_date
                 FROM bookings b
                 JOIN students s ON b.student_id = s.id
                 JOIN rooms r ON b.room_id = r.id
+                WHERE b.status = 'pending'
+                ORDER BY b.booking_date ASC
             ''').fetchall()
-        return render_template('view_bookings.html', bookings=bookings)
 
+            approved_bookings = conn.execute('''
+                SELECT b.id, b.student_id, s.student_id AS roll_number, s.name, r.room_number, b.status, b.booking_date
+                FROM bookings b
+                JOIN students s ON b.student_id = s.id
+                JOIN rooms r ON b.room_id = r.id
+                WHERE b.status = 'approved'
+                ORDER BY b.booking_date ASC
+            ''').fetchall()
+
+        return render_template('view_bookings.html', pending_bookings=pending_bookings, approved_bookings=approved_bookings)
+    
+    
     @app.route('/handle_complaints', methods=['GET'])
     def handle_complaints():
         with get_db() as conn:
@@ -195,24 +208,30 @@ def setup_routes(app):
     @app.route('/student_section/check_booking', methods=['GET'])
     def check_booking():
         if 'user' not in session:
-            return jsonify({'already_requested': False})
+            return jsonify({'already_requested': False, 'rejected': False})
 
         with get_db() as conn:
             username = session['user']
             student = conn.execute('SELECT id FROM students WHERE username = ?', (username,)).fetchone()
 
             if not student:
-                return jsonify({'already_requested': False})
+                return jsonify({'already_requested': False, 'rejected': False})
 
             student_id = student['id']
             existing_booking = conn.execute(
                 "SELECT * FROM bookings WHERE student_id = ? AND status IN ('pending', 'approved')",
                 (student_id,)
             ).fetchone()
-            already_requested = existing_booking is not None
+            rejected_booking = conn.execute(
+                "SELECT * FROM bookings WHERE student_id = ? AND status = 'rejected' ORDER BY booking_date DESC LIMIT 1",
+                (student_id,)
+            ).fetchone()
 
-        return jsonify({'already_requested': already_requested})
-
+            return jsonify({
+                'already_requested': existing_booking is not None,
+                'rejected': rejected_booking is not None
+            })
+        
     @app.route('/student_section/get_rooms', methods=['GET'])
     def get_rooms():
         with get_db() as conn:
@@ -282,6 +301,16 @@ def setup_routes(app):
                     ORDER BY b.booking_date ASC
                 """).fetchall()
                 print("FCFS Bookings Order:", [(b['id'], b['booking_date']) for b in bookings])
+            elif strategy == 'sjf':
+                bookings = conn.execute("""
+                    SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date, 
+                        (r.max_capacity - r.current_occupancy) AS remaining_capacity
+                    FROM bookings b
+                    JOIN rooms r ON b.room_id = r.id
+                    WHERE b.status = 'pending'
+                    ORDER BY (r.max_capacity - r.current_occupancy) ASC, b.booking_date ASC
+                """).fetchall()
+                print("SJF Bookings Order:", [(b['id'], b['room_id'], b['remaining_capacity'], b['booking_date']) for b in bookings])
             else:
                 bookings = conn.execute("""
                     SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date, r.max_capacity
@@ -292,6 +321,7 @@ def setup_routes(app):
                 """).fetchall()
                 print("Priority Bookings Order:", [(b['id'], b['room_id'], b['max_capacity'], b['booking_date']) for b in bookings])
 
+            processed_bookings = []
             for booking in bookings:
                 booking_id = booking['id']
                 room_id = booking['room_id']
@@ -306,6 +336,7 @@ def setup_routes(app):
                 if not room or room['current_occupancy'] >= room['max_capacity']:
                     conn.execute("UPDATE bookings SET status = 'rejected' WHERE id = ?", (booking_id,))
                     conn.commit()
+                    print(f"Rejected booking {booking_id}: Room {room_id} is full (current_occupancy={room['current_occupancy']}, max_capacity={room['max_capacity']})")
                     continue
 
                 conn.execute("UPDATE bookings SET status = 'approved' WHERE id = ?", (booking_id,))
@@ -323,6 +354,9 @@ def setup_routes(app):
                     WHERE id = ?
                 """, (room_id,))
                 conn.commit()
+                processed_bookings.append((booking_id, room_id))
+                print(f"Approved booking {booking_id}: Room {room_id}")
 
+            print("Processed Bookings Order:", processed_bookings)
             flash('Bookings processed successfully.', 'success')
         return redirect(url_for('view_bookings'))

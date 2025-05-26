@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>View Bookings</title>
+  <title>Manage Bookings</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -29,16 +29,17 @@
 
       <h3>Process Pending Bookings</h3>
       <form method="POST" action="{{ url_for('process_bookings') }}">
-        <label for="strategy">Allocation Strategy:</label>
+        <label for="strategy">Select Strategy:</label>
         <select name="strategy" id="strategy">
-          <option value="fcfs">First-Come, First-Served (FCFS)</option>
-          <option value="priority">Priority (Single > Double > Triple)</option>
-        </select><br><br>
+          <option value="fcfs">First Come, First Served (FCFS)</option>
+          <option value="priority">Priority (by room capacity)</option>
+          <option value="sjf">Shortest Job First (by remaining capacity)</option>
+        </select>
         <button type="submit">Process Bookings</button>
       </form>
 
-      <h3>Booking List</h3>
-      {% if bookings %}
+      <h3>Pending Booking Requests</h3>
+      {% if pending_bookings %}
         <table class="booking-table">
           <thead>
             <tr>
@@ -51,7 +52,7 @@
             </tr>
           </thead>
           <tbody>
-          {% for booking in bookings %}
+          {% for booking in pending_bookings %}
             <tr>
               <td>{{ booking['id'] }}</td>
               <td>{{ booking['roll_number'] }}</td>
@@ -64,7 +65,37 @@
           </tbody>
         </table>
       {% else %}
-        <p class="no-data">No bookings found.</p>
+        <p class="no-data">No pending booking requests.</p>
+      {% endif %}
+
+      <h3>Approved Bookings</h3>
+      {% if approved_bookings %}
+        <table class="booking-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Student Roll No</th>
+              <th>Student Name</th>
+              <th>Room Number</th>
+              <th>Status</th>
+              <th>Booking Date</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for booking in approved_bookings %}
+            <tr>
+              <td>{{ booking['id'] }}</td>
+              <td>{{ booking['roll_number'] }}</td>
+              <td>{{ booking['name'] }}</td>
+              <td>{{ booking['room_number'] }}</td>
+              <td>{{ booking['status'] }}</td>
+              <td>{{ booking['booking_date'] }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="no-data">No approved bookings.</p>
       {% endif %}
     </main>
   </div>
