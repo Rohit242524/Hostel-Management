@@ -128,14 +128,14 @@ def setup_routes(app):
                 try:
                     cursor = conn.cursor()
                     cursor.execute(
-                        "INSERT INTO rooms (room_number, status, current_occupancy, capacity) VALUES (?, ?, ?, ?)",
+                        "INSERT INTO rooms (room_number, status, current_occupancy, max_capacity) VALUES (?, ?, ?, ?)",
                         (room_number, status, 0, 1),
                     )
                     new_room_id = cursor.lastrowid
                     cursor.execute(
                         """
                         UPDATE rooms
-                        SET capacity = CASE
+                        SET max_capacity = CASE
                             WHEN id < 10 THEN 1
                             WHEN id BETWEEN 10 AND 25 THEN 2
                             ELSE 3
@@ -154,7 +154,7 @@ def setup_routes(app):
                     )
 
             rooms = conn.execute(
-                "SELECT id, room_number, status, capacity, current_occupancy FROM rooms"
+                "SELECT id, room_number, status, max_capacity, current_occupancy FROM rooms"
             ).fetchall()
         return render_template("manage_rooms.html", rooms=rooms)
 
@@ -477,11 +477,11 @@ def setup_routes(app):
                     bookings = conn.execute(
                         """
                         SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date,
-                               (r.capacity - r.current_occupancy) AS remaining_capacity
+                               (r.max_capacity - r.current_occupancy) AS remaining_capacity
                         FROM bookings b
                         JOIN rooms r ON b.room_id = r.id
                         WHERE b.status = 'pending'
-                        ORDER BY (r.capacity - r.current_occupancy) ASC, b.booking_date ASC
+                        ORDER BY (r.max_capacity - r.current_occupancy) ASC, b.booking_date ASC
                     """
                     ).fetchall()
                     print(
@@ -499,17 +499,22 @@ def setup_routes(app):
                 else:
                     bookings = conn.execute(
                         """
-                        SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date, r.capacity
+                        SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date, r.max_capacity
                         FROM bookings b
                         JOIN rooms r ON b.room_id = r.id
                         WHERE b.status = 'pending'
-                        ORDER BY r.capacity ASC, b.booking_date ASC
+                        ORDER BY r.max_capacity ASC, b.booking_date ASC
                     """
                     ).fetchall()
                     print(
                         "Priority Bookings Order:",
                         [
-                            (b["id"], b["room_id"], b["capacity"], b["booking_date"])
+                            (
+                                b["id"],
+                                b["room_id"],
+                                b["max_capacity"],
+                                b["booking_date"],
+                            )
                             for b in bookings
                         ],
                     )
@@ -522,21 +527,21 @@ def setup_routes(app):
 
                     room = conn.execute(
                         """
-                        SELECT capacity, current_occupancy
+                        SELECT max_capacity, current_occupancy
                         FROM rooms
                         WHERE id = ?
                     """,
                         (room_id,),
                     ).fetchone()
 
-                    if not room or room["current_occupancy"] >= room["capacity"]:
+                    if not room or room["current_occupancy"] >= room["max_capacity"]:
                         conn.execute(
                             "UPDATE bookings SET status = 'rejected' WHERE id = ?",
                             (booking_id,),
                         )
                         conn.commit()
                         print(
-                            f"Rejected booking {booking_id}: Room {room_id} is full (current_occupancy={room['current_occupancy'] if room else 'N/A'}, capacity={room['capacity'] if room else 'N/A'})"
+                            f"Rejected booking {booking_id}: Room {room_id} is full (current_occupancy={room['current_occupancy'] if room else 'N/A'}, max_capacity={room['max_capacity'] if room else 'N/A'})"
                         )
                         continue
 
@@ -556,7 +561,7 @@ def setup_routes(app):
                         """
                         UPDATE rooms
                         SET status = CASE
-                            WHEN current_occupancy >= capacity THEN 'occupied'
+                            WHEN current_occupancy >= max_capacity THEN 'occupied'
                             ELSE 'available'
                         END
                         WHERE id = ?
@@ -604,12 +609,12 @@ def setup_routes(app):
                         """
                         SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date,
                                s.student_id AS roll_number, s.name, r.room_number,
-                               (r.capacity - r.current_occupancy) AS remaining_capacity
+                               (r.max_capacity - r.current_occupancy) AS remaining_capacity
                         FROM bookings b
                         JOIN students s ON b.student_id = s.id
                         JOIN rooms r ON b.room_id = r.id
                         WHERE b.status = 'pending'
-                        ORDER BY (r.capacity - r.current_occupancy) ASC, b.booking_date ASC
+                        ORDER BY (r.max_capacity - r.current_occupancy) ASC, b.booking_date ASC
                     """
                     ).fetchall()
                     print(
@@ -629,18 +634,23 @@ def setup_routes(app):
                         """
                         SELECT b.id, b.student_id, b.room_id, b.status, b.booking_date,
                                s.student_id AS roll_number, s.name, r.room_number,
-                               r.capacity
+                               r.max_capacity
                         FROM bookings b
                         JOIN students s ON b.student_id = s.id
                         JOIN rooms r ON b.room_id = r.id
                         WHERE b.status = 'pending'
-                        ORDER BY r.capacity ASC, b.booking_date ASC
+                        ORDER BY r.max_capacity ASC, b.booking_date ASC
                     """
                     ).fetchall()
                     print(
                         "Priority Sort Order:",
                         [
-                            (b["id"], b["room_id"], b["capacity"], b["booking_date"])
+                            (
+                                b["id"],
+                                b["room_id"],
+                                b["max_capacity"],
+                                b["booking_date"],
+                            )
                             for b in bookings
                         ],
                     )

@@ -91,7 +91,7 @@ function loadBookingForm() {
 
       let roomOptions = rooms.map(room => `
         <option value="${room.id}">
-          ${room.room_number} (Beds Available: ${room.available_beds}/${room.capacity})
+          ${room.room_number} (Beds Available: ${room.available_beds}/${room.max_capacity})
         </option>
       `).join('');
 

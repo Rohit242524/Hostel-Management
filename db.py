@@ -44,7 +44,7 @@ cursor.execute(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         room_number TEXT NOT NULL UNIQUE,
         status TEXT NOT NULL,
-        capacity INTEGER NOT NULL,
+        max_capacity INTEGER NOT NULL,
         current_occupancy INTEGER NOT NULL
     )
 """
