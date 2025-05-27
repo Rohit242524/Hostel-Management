@@ -1,4 +1,5 @@
 <h2>Manage Bookings</h2>
+
 <h3>Pending Bookings</h3>
 {% if pending_bookings %}
 <div>
@@ -8,7 +9,7 @@
         <option value="sjf">Shortest Job First (SJF)</option>
         <option value="priority">Priority</option>
     </select>
-    <button onclick="sortBookings()">Sort</button>
+    <button id="sortButton">Sort</button>
 </div>
 <table id="pendingBookingsTable">
     <thead>
@@ -39,6 +40,7 @@
 {% else %}
 <p>No pending bookings.</p>
 {% endif %}
+
 <h3>Approved Bookings</h3>
 {% if approved_bookings %}
 <table>
@@ -66,6 +68,7 @@
 {% else %}
 <p>No approved bookings.</p>
 {% endif %}
+
 <h3>Rejected Bookings</h3>
 {% if rejected_bookings %}
 <table>
@@ -93,32 +96,42 @@
 {% else %}
 <p>No rejected bookings.</p>
 {% endif %}
+
 <script>
-function sortBookings() {
-    const strategy = document.getElementById('strategy').value;
-    document.getElementById('processStrategy').value = strategy;
-    fetch('/sort_bookings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `strategy=${strategy}`
-    })
-        .then(response => response.json())
-        .then(bookings => {
-            const tbody = document.querySelector('#pendingBookingsTable tbody');
-            tbody.innerHTML = '';
-            bookings.forEach(booking => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${booking.id}</td>
-                    <td>${booking.roll_number}</td>
-                    <td>${booking.name}</td>
-                    <td>${booking.room_number}</td>
-                    <td>${booking.booking_date}</td>
-                `;
-                tbody.appendChild(row);
+document.addEventListener("DOMContentLoaded", function () {
+    const sortButton = document.getElementById('sortButton');
+    if (sortButton) {
+        sortButton.addEventListener('click', function () {
+            const strategy = document.getElementById('strategy').value;
+            document.getElementById('processStrategy').value = strategy;
+
+            fetch('/sort_bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `strategy=${strategy}`
+            })
+            .then(response => response.json())
+            .then(bookings => {
+                const tbody = document.querySelector('#pendingBookingsTable tbody');
+                tbody.innerHTML = '';
+                bookings.forEach(booking => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${booking.id}</td>
+                        <td>${booking.roll_number}</td>
+                        <td>${booking.name}</td>
+                        <td>${booking.room_number}</td>
+                        <td>${booking.booking_date}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error during sorting:', error);
             });
         });
-}
+    }
+});
 </script>
