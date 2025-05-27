@@ -669,7 +669,7 @@ def setup_routes(app):
                     return render_template("view_students.html", students=students)
                 elif section == "rooms":
                     rooms = conn.execute(
-                        "SELECT id, room_number, status, capacity, current_occupancy FROM rooms"
+                        "SELECT id, room_number, status, max_capacity, current_occupancy FROM rooms"
                     ).fetchall()
                     return render_template("manage_rooms.html", rooms=rooms)
                 elif section == "bookings":
