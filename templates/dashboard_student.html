@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (room.available_beds > 0) {
                                 const option = document.createElement('option');
                                 option.value = room.id;
-                                option.textContent = `Room ${room.room_number} (Capacity: ${room.capacity}, Available: ${room.available_beds})`;
+                                option.textContent = `Room ${room.room_number} (Capacity: ${room.max_capacity}, Available: ${room.available_beds})`;
                                 roomSelect.appendChild(option);
                             }
                         });
