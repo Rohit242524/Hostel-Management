@@ -47,5 +47,33 @@ function loadSection(section) {
             document.getElementById('mainContent').innerHTML = `<p class="error">Error loading section: ${error.message}</p>`;
         });
 }
+function sortBookings() {
+    const strategy = document.getElementById('strategy').value;
+    document.getElementById('processStrategy').value = strategy;
+    fetch('/sort_bookings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `strategy=${strategy}`
+    })
+        .then(response => response.json())
+        .then(bookings => {
+            const tbody = document.querySelector('#pendingBookingsTable tbody');
+            tbody.innerHTML = '';
+            bookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${booking.id}</td>
+                    <td>${booking.roll_number}</td>
+                    <td>${booking.name}</td>
+                    <td>${booking.room_number}</td>
+                    <td>${booking.booking_date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
+
 </script>
 {% endblock %}
