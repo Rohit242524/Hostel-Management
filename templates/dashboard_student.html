@@ -1,28 +1,99 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Student Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <script src="{{ url_for('static', filename='js/student_dashboard.js') }}" defer></script>
-</head>
-<body>
-
-<div class="admin-container">
-  <aside class="sidebar">
-    <h2>Student Panel</h2>
-    <ul>
-      <li onclick="loadSection('book_room')">Book a Room</li>
-      <li onclick="loadSection('allocation')">My Room Allocation</li>
-      <li onclick="loadSection('complaint')">Submit a Complaint</li>
-      <li><a href="{{ url_for('logout') }}">Logout</a></li>
-    </ul>
-  </aside>
-
-  <main class="main-content" id="mainContent">
-    <h2>Welcome, Student!</h2>
-    <p>Select an option from the sidebar to begin.</p>
-  </main>
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard">
+    <aside class="sidebar">
+        <h2>Student Panel</h2>
+        <ul>
+            <li><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('my_allocation') }}">My Allocation</a></li>
+            <li><a href="{{ url_for('submit_complaint') }}">Submit Complaint</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    <main>
+        <h2>Welcome, Student</h2>
+        <h3>Book a Room</h3>
+        <div id="bookingMessage"></div>
+        <form id="bookingForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" required>
+            <br>
+            <label for="room_id">Select Room:</label>
+            <select id="room_id" name="room_id" required>
+                <option value="">Select a room</option>
+            </select>
+            <br>
+            <label for="payment_method">Payment Method:</label>
+            <select id="payment_method" name="payment_method" required>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+            </select>
+            <br>
+            <button type="submit">Book Room</button>
+        </form>
+    </main>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if student already has a booking
+    fetch('/student_section/check_booking')
+        .then(response => response.json())
+        .then(data => {
+            const bookingForm = document.getElementById('bookingForm');
+            const bookingMessage = document.getElementById('bookingMessage');
+            if (data.already_requested) {
+                bookingForm.style.display = 'none';
+                bookingMessage.innerHTML = '<p class="error">You already have a pending or approved booking. Check your allocation.</p>';
+            } else if (data.rejected) {
+                bookingForm.style.display = 'block';
+                bookingMessage.innerHTML = '<p class="info">Your previous booking was rejected. You can book again.</p>';
+            } else {
+                bookingForm.style.display = 'block';
+                // Load available rooms
+                fetch('/student_section/get_rooms')
+                    .then(response => response.json())
+                    .then(rooms => {
+                        const roomSelect = document.getElementById('room_id');
+                        rooms.forEach(room => {
+                            if (room.available_beds > 0) {
+                                const option = document.createElement('option');
+                                option.value = room.id;
+                                option.textContent = `Room ${room.room_number} (Capacity: ${room.max_capacity}, Available: ${room.available_beds})`;
+                                roomSelect.appendChild(option);
+                            }
+                        });
+                    });
+            }
+        });
 
-</body>
-</html>
+    // Handle form submission
+    document.getElementById('bookingForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        fetch('/student_section/book_room', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                const bookingMessage = document.getElementById('bookingMessage');
+                if (data.success) {
+                    bookingMessage.innerHTML = `<p class="success">${data.message}</p>`;
+                    e.target.style.display = 'none';
+                } else {
+                    bookingMessage.innerHTML = `<p class="error">${data.message}</p>`;
+                }
+            });
+    });
+});
+</script>
+{% endblock %}

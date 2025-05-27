@@ -1,29 +1,79 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}" defer></script>
-</head>
-<body>
-
-<div class="admin-container">
-  <aside class="sidebar">
-    <h2>Admin Panel</h2>
-    <ul>
-      <li onclick="loadSection('students')">View Students</li>
-      <li onclick="loadSection('rooms')">Manage Rooms</li>
-      <li onclick="loadSection('bookings')">View Bookings</li>
-      <li onclick="loadSection('complaints')">Handle Complaints</li>
-      <li><a href="{{ url_for('logout') }}">Logout</a></li>
-    </ul>
-  </aside>
-
-  <main class="main-content" id="mainContent">
-    <h2>Welcome, Admin!</h2>
-    <p>Select an option from the sidebar to begin.</p>
-  </main>
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard">
+    <aside class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li onclick="loadSection('students')">View Students</li>
+            <li onclick="loadSection('rooms')">Manage Rooms</li>
+            <li onclick="loadSection('bookings')">Manage Bookings</li>
+            <li onclick="loadSection('complaints')">Handle Complaints</li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    <main id="mainContent">
+        <h2>Welcome, Admin</h2>
+        <p>Select an option from the sidebar to manage the hostel.</p>
+    </main>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+function loadSection(section) {
+    fetch(`/load_section?section=${section}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    if (err.redirect) {
+                        window.location.href = err.redirect;
+                    }
+                    throw new Error(err.error || 'Network response was not ok');
+                });
+            }
+            return response.text();
+        })
+        .then(data => {
+            document.getElementById('mainContent').innerHTML = data;
+        })
+        .catch(error => {
+            console.error('Error loading section:', error);
+            document.getElementById('mainContent').innerHTML = `<p class="error">Error loading section: ${error.message}</p>`;
+        });
+}
+function sortBookings() {
+    const strategy = document.getElementById('strategy').value;
+    document.getElementById('processStrategy').value = strategy;
+    fetch('/sort_bookings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `strategy=${strategy}`
+    })
+        .then(response => response.json())
+        .then(bookings => {
+            const tbody = document.querySelector('#pendingBookingsTable tbody');
+            tbody.innerHTML = '';
+            bookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${booking.id}</td>
+                    <td>${booking.roll_number}</td>
+                    <td>${booking.name}</td>
+                    <td>${booking.room_number}</td>
+                    <td>${booking.booking_date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
 
-</body>
-</html>
+</script>
+{% endblock %}

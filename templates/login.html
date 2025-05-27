@@ -1,26 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Login</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <div class="login-container">
-    <h2>Hostel Login</h2>
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="login-container">
+    <h2>Login</h2>
     <form method="POST" action="{{ url_for('login') }}">
-      {% if error %}
-        <p class="error">{{ error }}</p>
-      {% endif %}
-      <select name="user_type">
-        <option value="student">Student</option>
-        <option value="admin">Admin</option>
-      </select><br><br>
-      <input type="text" name="username" placeholder="Username" required><br>
-      <input type="password" name="password" placeholder="Password" required><br>
-      <button type="submit">Login</button>
+        <label for="user_type">User Type:</label>
+        <select id="user_type" name="user_type" required>
+            <option value="admin">Admin</option>
+            <option value="student">Student</option>
+        </select>
+        <br>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
     </form>
-    <p>New Student? <a href="{{ url_for('register_student') }}">Register here</a></p>
-  </div>
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
-</html>
+    <p>Not a student? <a href="{{ url_for('register_student') }}">Register here</a></p>
+</div>
+{% endblock %}

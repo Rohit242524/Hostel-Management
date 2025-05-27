@@ -1,0 +1,39 @@
+<h2>Handle Complaints</h2>
+{% if complaints %}
+<table>
+    <thead>
+        <tr>
+            <th>Complaint ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Complaint</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for complaint in complaints %}
+        <tr>
+            <td>{{ complaint.id }}</td>
+            <td>{{ complaint.roll_number }}</td>
+            <td>{{ complaint.name }}</td>
+            <td>{{ complaint.complaint_text }}</td>
+            <td>{{ complaint.status }}</td>
+            <td>{{ complaint.created_at }}</td>
+            <td>
+                {% if complaint.status == 'pending' %}
+                <form method="POST" action="{{ url_for('resolve_complaint', complaint_id=complaint.id) }}">
+                    <button type="submit">Resolve</button>
+                </form>
+                {% else %}
+                Resolved
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No complaints found.</p>
+{% endif %}

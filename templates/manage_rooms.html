@@ -1,0 +1,60 @@
+<h2>Manage Rooms</h2>
+<h3>Add New Room</h3>
+<form id="addRoomForm">
+    <label for="room_number">Room Number:</label>
+    <input type="text" id="room_number" name="room_number" required>
+    <br>
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+        <option value="available">Available</option>
+        <option value="occupied">Occupied</option>
+    </select>
+    <br>
+    <button type="submit">Add Room</button>
+</form>
+<div id="roomMessage"></div>
+<h3>Existing Rooms</h3>
+{% if rooms %}
+<table>
+    <thead>
+        <tr>
+            <th>Room Number</th>
+            <th>Status</th>
+            <th>Capacity</th>
+            <th>Current Occupancy</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for room in rooms %}
+        <tr>
+            <td>{{ room.room_number }}</td>
+            <td>{{ room.status }}</td>
+            <td>{{ room.max_capacity }}</td>
+            <td>{{ room.current_occupancy }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No rooms found.</p>
+{% endif %}
+<script>
+document.getElementById('addRoomForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    fetch('/manage_rooms', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            const roomMessage = document.getElementById('roomMessage');
+            if (data.success) {
+                roomMessage.innerHTML = `<p class="success">${data.message}</p>`;
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                roomMessage.innerHTML = `<p class="error">${data.message}</p>`;
+            }
+        });
+});
+</script>

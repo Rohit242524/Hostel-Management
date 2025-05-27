@@ -1,0 +1,95 @@
+<h2>Manage Bookings</h2>
+<h3>Pending Bookings</h3>
+{% if pending_bookings %}
+<div>
+    <label for="strategy">Sort By:</label>
+    <select id="strategy">
+        <option value="fcfs">First Come First Serve (FCFS)</option>
+        <option value="sjf">Shortest Job First (SJF)</option>
+        <option value="priority">Priority</option>
+    </select>
+    <button onclick="sortBookings()">Sort</button>
+</div>
+<table id="pendingBookingsTable">
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in pending_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="POST" action="{{ url_for('process_bookings') }}">
+    <input type="hidden" name="strategy" id="processStrategy" value="fcfs">
+    <button type="submit">Process Bookings</button>
+</form>
+{% else %}
+<p>No pending bookings.</p>
+{% endif %}
+<h3>Approved Bookings</h3>
+{% if approved_bookings %}
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in approved_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No approved bookings.</p>
+{% endif %}
+<h3>Rejected Bookings</h3>
+{% if rejected_bookings %}
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in rejected_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No rejected bookings.</p>
+{% endif %}
