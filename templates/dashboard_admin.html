@@ -47,6 +47,8 @@ function loadSection(section) {
             document.getElementById('mainContent').innerHTML = `<p class="error">Error loading section: ${error.message}</p>`;
         });
 }
+
+
 function sortBookings() {
     const strategy = document.getElementById('strategy').value;
     document.getElementById('processStrategy').value = strategy;
@@ -74,6 +76,26 @@ function sortBookings() {
             });
         });
 }
+function addRoom() {
+    const form = document.getElementById('addRoomForm');
+    const formData = new FormData(form);
 
+    fetch('/manage_rooms', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const roomMessage = document.getElementById('roomMessage');
+        if (roomMessage) {
+            if (data.success) {
+                roomMessage.innerHTML = `<p class="success">${data.message}</p>`;
+                setTimeout(() => loadSection('rooms'), 500);
+            } else {
+                roomMessage.innerHTML = `<p class="error">${data.message}</p>`;
+            }
+        }
+    });
+}
 </script>
 {% endblock %}

@@ -118,6 +118,7 @@ def setup_routes(app):
         with get_db() as conn:
             if request.method == "POST":
                 room_number = request.form.get("room_number")
+                max_capacity = request.form.get("max_capacity")
                 status = request.form.get("status", "available")
 
                 if not room_number:
@@ -129,20 +130,7 @@ def setup_routes(app):
                     cursor = conn.cursor()
                     cursor.execute(
                         "INSERT INTO rooms (room_number, status, current_occupancy, max_capacity) VALUES (?, ?, ?, ?)",
-                        (room_number, status, 0, 1),
-                    )
-                    new_room_id = cursor.lastrowid
-                    cursor.execute(
-                        """
-                        UPDATE rooms
-                        SET max_capacity = CASE
-                            WHEN id < 10 THEN 1
-                            WHEN id BETWEEN 10 AND 25 THEN 2
-                            ELSE 3
-                        END
-                        WHERE id = ?
-                    """,
-                        (new_room_id,),
+                        (room_number, status, 0, max_capacity),
                     )
                     conn.commit()
                     return jsonify(

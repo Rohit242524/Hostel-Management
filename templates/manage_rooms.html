@@ -3,14 +3,15 @@
 <form id="addRoomForm">
     <label for="room_number">Room Number:</label>
     <input type="text" id="room_number" name="room_number" required>
-    <br>
-    <label for="status">Status:</label>
+    <label for="max_capacity">Max Capacity:</label>
+    <input type="number" id="max_capacity" name="max_capacity" required>
+    <label for="status"> Status:</label>
     <select id="status" name="status">
         <option value="available">Available</option>
         <option value="occupied">Occupied</option>
     </select>
     <br>
-    <button type="submit">Add Room</button>
+    <button type="button" onclick="addRoom()">Add room</button>
 </form>
 <div id="roomMessage"></div>
 <h3>Existing Rooms</h3>
@@ -38,23 +39,3 @@
 {% else %}
 <p>No rooms found.</p>
 {% endif %}
-<script>
-document.getElementById('addRoomForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    fetch('/manage_rooms', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            const roomMessage = document.getElementById('roomMessage');
-            if (data.success) {
-                roomMessage.innerHTML = `<p class="success">${data.message}</p>`;
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                roomMessage.innerHTML = `<p class="error">${data.message}</p>`;
-            }
-        });
-});
-</script>
