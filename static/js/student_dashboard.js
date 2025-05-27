@@ -1,13 +1,21 @@
-// student_dashboard.js
 function loadSection(section) {
   const content = document.getElementById('mainContent');
   content.innerHTML = '<div class="spinner"></div><p>Loading...</p>';
 
   if (section === 'book_room') {
-    // Check if the student already has a booking or if a booking was rejected
     fetch('/student_section/check_booking')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            content.innerHTML = '<p class="error">Session expired. Please <a href="/login">log in again</a>.</p>';
+            return;
+          }
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
+        if (!data) return; // Exit if session expired
         if (data.rejected) {
           content.innerHTML = `
             <h2>Book a Room</h2>
@@ -27,7 +35,7 @@ function loadSection(section) {
         }
       })
       .catch(error => {
-        content.innerHTML = '<p class="error">Error checking booking status.</p>';
+        content.innerHTML = '<p class="error">Error checking booking status: ' + error.message + '</p>';
         console.error(error);
       });
   } else {
@@ -36,15 +44,27 @@ function loadSection(section) {
       url = '/my_allocation';
     } else if (section === 'complaint') {
       url = '/submit_complaint';
+    } else {
+      content.innerHTML = '<p class="error">Invalid section.</p>';
+      return;
     }
 
     fetch(url)
-      .then(response => response.text())
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            content.innerHTML = '<p class="error">Session expired. Please <a href="/login">log in again</a>.</p>';
+            return;
+          }
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
       .then(html => {
-        content.innerHTML = html;
+        if (html) content.innerHTML = html;
       })
       .catch(error => {
-        content.innerHTML = '<p class="error">Error loading section.</p>';
+        content.innerHTML = '<p class="error">Error loading section: ' + error.message + '</p>';
         console.error(error);
       });
   }
@@ -52,11 +72,26 @@ function loadSection(section) {
 
 function loadBookingForm() {
   fetch('/student_section/get_rooms')
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          document.getElementById('mainContent').innerHTML = '<p class="error">Session expired. Please <a href="/login">log in again</a>.</p>';
+          return;
+        }
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(rooms => {
+      if (!rooms) return; // Exit if session expired
+      if (rooms.length === 0) {
+        document.getElementById('mainContent').innerHTML += '<p class="error">No rooms are currently available for booking.</p>';
+        return;
+      }
+
       let roomOptions = rooms.map(room => `
         <option value="${room.id}">
-          ${room.room_number} (Beds Available: ${room.available_beds}/${room.max_capacity})
+          ${room.room_number} (Beds Available: ${room.available_beds}/${room.capacity})
         </option>
       `).join('');
 
@@ -92,7 +127,7 @@ function loadBookingForm() {
       document.getElementById('mainContent').insertAdjacentHTML('beforeend', formHtml);
     })
     .catch(error => {
-      document.getElementById('mainContent').innerHTML += '<p class="error">Error loading rooms.</p>';
+      document.getElementById('mainContent').innerHTML += '<p class="error">Error loading rooms: ' + error.message + '</p>';
       console.error(error);
     });
 }
@@ -107,8 +142,18 @@ function submitBooking(event) {
     method: 'POST',
     body: formData
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          message.innerHTML = '<p class="error">Session expired. Please <a href="/login">log in again</a>.</p>';
+          return;
+        }
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(data => {
+      if (!data) return; // Exit if session expired
       if (data.success) {
         message.innerHTML = '<p class="success">Room booking requested! Waiting for admin approval.</p>';
         form.reset();
@@ -118,7 +163,7 @@ function submitBooking(event) {
       }
     })
     .catch(error => {
-      message.innerHTML = '<p class="error">Error submitting booking.</p>';
+      message.innerHTML = '<p class="error">Error submitting booking: ' + error.message + '</p>';
       console.error(error);
     });
 }

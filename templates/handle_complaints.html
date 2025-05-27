@@ -1,72 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Handle Complaints</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <div class="admin-container">
-    <aside class="sidebar">
-      <h2>Admin Panel</h2>
-      <ul>
-        <li onclick="loadSection('students')">View Students</li>
-        <li onclick="loadSection('rooms')">Manage Rooms</li>
-        <li onclick="loadSection('bookings')">Manage Bookings</li>
-        <li onclick="loadSection('complaints')">Handle Complaints</li>
-        <li><a href="{{ url_for('logout') }}">Logout</a></li>
-      </ul>
-    </aside>
-
-    <main class="main-content" id="mainContent">
-      <h2>Handle Complaints</h2>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <p class="{{ category }}">{{ message }}</p>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      <h3>Complaint List</h3>
-      {% if complaints %}
-        <table class="booking-table">
-          <thead>
-            <tr>
-              <th>Complaint ID</th>
-              <th>Student Roll No</th>
-              <th>Student Name</th>
-              <th>Complaint Text</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for complaint in complaints %}
-            <tr>
-              <td>{{ complaint['id'] }}</td>
-              <td>{{ complaint['roll_number'] }}</td>
-              <td>{{ complaint['name'] }}</td>
-              <td>{{ complaint['complaint_text'] }}</td>
-              <td>{{ complaint['status'] }}</td>
-              <td>{{ complaint['created_at'] }}</td>
-              <td>
-                {% if complaint['status'] == 'pending' %}
-                  <form method="POST" action="{{ url_for('resolve_complaint', complaint_id=complaint['id']) }}">
-                    <button type="submit" class="resolve-button">Mark as Resolved</button>
-                  </form>
+<h2>Handle Complaints</h2>
+{% if complaints %}
+<table>
+    <thead>
+        <tr>
+            <th>Complaint ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Complaint</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for complaint in complaints %}
+        <tr>
+            <td>{{ complaint.id }}</td>
+            <td>{{ complaint.roll_number }}</td>
+            <td>{{ complaint.name }}</td>
+            <td>{{ complaint.complaint_text }}</td>
+            <td>{{ complaint.status }}</td>
+            <td>{{ complaint.created_at }}</td>
+            <td>
+                {% if complaint.status == 'pending' %}
+                <form method="POST" action="{{ url_for('resolve_complaint', complaint_id=complaint.id) }}">
+                    <button type="submit">Resolve</button>
+                </form>
                 {% else %}
-                  <span>Resolved</span>
+                Resolved
                 {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <p class="no-data">No complaints found.</p>
-      {% endif %}
-    </main>
-  </div>
-</body>
-</html>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No complaints found.</p>
+{% endif %}

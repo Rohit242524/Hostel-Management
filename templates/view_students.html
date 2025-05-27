@@ -1,16 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>View Students</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <h2>Students</h2>
-  <ul>
-  {% for student in students %}
-    <li>Roll No: {{ student['student_id'] }} - {{ student['username'] }} - {{ student['name'] }} ({{ student['email'] }})</li>
-  {% endfor %}
-  </ul>
-  <p><a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a></p>
-</body>
-</html>
+<h2>Students List</h2>
+{% if students %}
+<table>
+    <thead>
+        <tr>
+            <th>Roll Number</th>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.student_id }}</td>
+            <td>{{ student.username }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No students found.</p>
+{% endif %}

@@ -1,22 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Submit Complaint</title>
-</head>
-<body>
-  <h2>Submit a Complaint</h2>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <p class="{{ category }}">{{ message }}</p>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <form method="POST" action="{{ url_for('submit_complaint') }}">
-    <label for="complaint">Your Complaint:</label><br>
-    <textarea id="complaint" name="complaint" rows="5" cols="40" placeholder="Describe your issue here..." required></textarea><br><br>
-    <button type="submit">Submit Complaint</button>
-  </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Submit Complaint{% endblock %}
+{% block content %}
+<div class="dashboard">
+    <aside class="sidebar">
+        <h2>Student Panel</h2>
+        <ul>
+            <li><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('my_allocation') }}">My Allocation</a></li>
+            <li><a href="{{ url_for('submit_complaint') }}">Submit Complaint</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    <main>
+        <h2>Submit a Complaint</h2>
+        <form method="POST">
+            <label for="complaint">Complaint:</label>
+            <textarea id="complaint" name="complaint" required></textarea>
+            <br>
+            <button type="submit">Submit Complaint</button>
+        </form>
+    </main>
+</div>
+{% endblock %}

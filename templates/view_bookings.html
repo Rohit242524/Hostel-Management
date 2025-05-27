@@ -1,103 +1,124 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Manage Bookings</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <div class="admin-container">
-    <aside class="sidebar">
-      <h2>Admin Panel</h2>
-      <ul>
-        <li onclick="loadSection('students')">View Students</li>
-        <li onclick="loadSection('rooms')">Manage Rooms</li>
-        <li onclick="loadSection('bookings')">Manage Bookings</li>
-        <li onclick="loadSection('complaints')">Handle Complaints</li>
-        <li><a href="{{ url_for('logout') }}">Logout</a></li>
-      </ul>
-    </aside>
-
-    <main class="main-content" id="mainContent">
-      <h2>Manage Bookings</h2>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <p class="{{ category }}">{{ message }}</p>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      <h3>Process Pending Bookings</h3>
-      <form method="POST" action="{{ url_for('process_bookings') }}">
-        <label for="strategy">Select Strategy:</label>
-        <select name="strategy" id="strategy">
-          <option value="fcfs">First Come, First Served (FCFS)</option>
-          <option value="priority">Priority (by room capacity)</option>
-          <option value="sjf">Shortest Job First (by remaining capacity)</option>
-        </select>
-        <button type="submit">Process Bookings</button>
-      </form>
-
-      <h3>Pending Booking Requests</h3>
-      {% if pending_bookings %}
-        <table class="booking-table">
-          <thead>
-            <tr>
-              <th>Booking ID</th>
-              <th>Student Roll No</th>
-              <th>Student Name</th>
-              <th>Room Number</th>
-              <th>Status</th>
-              <th>Booking Date</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for booking in pending_bookings %}
-            <tr>
-              <td>{{ booking['id'] }}</td>
-              <td>{{ booking['roll_number'] }}</td>
-              <td>{{ booking['name'] }}</td>
-              <td>{{ booking['room_number'] }}</td>
-              <td>{{ booking['status'] }}</td>
-              <td>{{ booking['booking_date'] }}</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <p class="no-data">No pending booking requests.</p>
-      {% endif %}
-
-      <h3>Approved Bookings</h3>
-      {% if approved_bookings %}
-        <table class="booking-table">
-          <thead>
-            <tr>
-              <th>Booking ID</th>
-              <th>Student Roll No</th>
-              <th>Student Name</th>
-              <th>Room Number</th>
-              <th>Status</th>
-              <th>Booking Date</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% for booking in approved_bookings %}
-            <tr>
-              <td>{{ booking['id'] }}</td>
-              <td>{{ booking['roll_number'] }}</td>
-              <td>{{ booking['name'] }}</td>
-              <td>{{ booking['room_number'] }}</td>
-              <td>{{ booking['status'] }}</td>
-              <td>{{ booking['booking_date'] }}</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <p class="no-data">No approved bookings.</p>
-      {% endif %}
-    </main>
-  </div>
-</body>
-</html>
+<h2>Manage Bookings</h2>
+<h3>Pending Bookings</h3>
+{% if pending_bookings %}
+<div>
+    <label for="strategy">Sort By:</label>
+    <select id="strategy">
+        <option value="fcfs">First Come First Serve (FCFS)</option>
+        <option value="sjf">Shortest Job First (SJF)</option>
+        <option value="priority">Priority</option>
+    </select>
+    <button onclick="sortBookings()">Sort</button>
+</div>
+<table id="pendingBookingsTable">
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in pending_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="POST" action="{{ url_for('process_bookings') }}">
+    <input type="hidden" name="strategy" id="processStrategy" value="fcfs">
+    <button type="submit">Process Bookings</button>
+</form>
+{% else %}
+<p>No pending bookings.</p>
+{% endif %}
+<h3>Approved Bookings</h3>
+{% if approved_bookings %}
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in approved_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No approved bookings.</p>
+{% endif %}
+<h3>Rejected Bookings</h3>
+{% if rejected_bookings %}
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Booking Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in rejected_bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.roll_number }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.room_number }}</td>
+            <td>{{ booking.booking_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No rejected bookings.</p>
+{% endif %}
+<script>
+function sortBookings() {
+    const strategy = document.getElementById('strategy').value;
+    document.getElementById('processStrategy').value = strategy;
+    fetch('/sort_bookings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `strategy=${strategy}`
+    })
+        .then(response => response.json())
+        .then(bookings => {
+            const tbody = document.querySelector('#pendingBookingsTable tbody');
+            tbody.innerHTML = '';
+            bookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${booking.id}</td>
+                    <td>${booking.roll_number}</td>
+                    <td>${booking.name}</td>
+                    <td>${booking.room_number}</td>
+                    <td>${booking.booking_date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
+</script>

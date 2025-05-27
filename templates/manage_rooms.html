@@ -1,111 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Manage Rooms</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <div class="admin-container">
-    <aside class="sidebar">
-      <h2>Admin Panel</h2>
-      <ul>
-        <li onclick="loadSection('students')">View Students</li>
-        <li onclick="loadSection('rooms')">Manage Rooms</li>
-        <li onclick="loadSection('bookings')">Manage Bookings</li>
-        <li onclick="loadSection('complaints')">Handle Complaints</li>
-        <li><a href="{{ url_for('logout') }}">Logout</a></li>
-      </ul>
-    </aside>
-
-    <main class="main-content" id="mainContent">
-      <h2>Manage Rooms</h2>
-      <div id="message"></div>
-
-      <h3>Add New Room</h3>
-      <form id="addRoomForm" onsubmit="addRoom(event)">
-        <label for="room_number">Room Number:</label><br>
-        <input type="text" id="room_number" name="room_number" placeholder="Enter room number" required><br><br>
-
-        <label for="status">Status:</label><br>
-        <select id="status" name="status">
-          <option value="available">Available</option>
-          <option value="occupied">Occupied</option>
-          <option value="maintenance">Under Maintenance</option>
-        </select><br><br>
-
-        <button type="submit">Add Room</button>
-      </form>
-
-      <h3>Existing Rooms</h3>
-      <div id="roomsTable">
-        {% if rooms %}
-          <table class="booking-table">
-            <thead>
-              <tr>
-                <th>Room ID</th>
-                <th>Room Number</th>
-                <th>Capacity</th>
-                <th>Occupancy</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="roomsTableBody">
-            {% for room in rooms %}
-              <tr>
-                <td>{{ room['id'] }}</td>
-                <td>{{ room['room_number'] }}</td>
-                <td>{{ room['max_capacity'] }}</td>
-                <td>{{ room['current_occupancy'] }}/{{ room['max_capacity'] }}</td>
-                <td>{{ room['status'] }}</td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        {% else %}
-          <p class="no-data">No rooms available.</p>
-        {% endif %}
-      </div>
-    </main>
-  </div>
-
-  <script>
-    function addRoom(event) {
-      event.preventDefault();
-      const form = document.getElementById('addRoomForm');
-      const formData = new FormData(form);
-      const message = document.getElementById('message');
-
-      fetch('/manage_rooms', {
+<h2>Manage Rooms</h2>
+<h3>Add New Room</h3>
+<form id="addRoomForm">
+    <label for="room_number">Room Number:</label>
+    <input type="text" id="room_number" name="room_number" required>
+    <br>
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+        <option value="available">Available</option>
+        <option value="occupied">Occupied</option>
+    </select>
+    <br>
+    <button type="submit">Add Room</button>
+</form>
+<div id="roomMessage"></div>
+<h3>Existing Rooms</h3>
+{% if rooms %}
+<table>
+    <thead>
+        <tr>
+            <th>Room Number</th>
+            <th>Status</th>
+            <th>Capacity</th>
+            <th>Current Occupancy</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for room in rooms %}
+        <tr>
+            <td>{{ room.room_number }}</td>
+            <td>{{ room.status }}</td>
+            <td>{{ room.capacity }}</td>
+            <td>{{ room.current_occupancy }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No rooms found.</p>
+{% endif %}
+<script>
+document.getElementById('addRoomForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    fetch('/manage_rooms', {
         method: 'POST',
         body: formData
-      })
-        .then(response => response.json()) // Expect JSON response
+    })
+        .then(response => response.json())
         .then(data => {
-          if (data.success) {
-            message.innerHTML = '<p class="success">' + data.message + '</p>';
-            form.reset();
-            // Fetch updated rooms list
-            fetch('/manage_rooms')
-              .then(response => response.text())
-              .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newTable = doc.querySelector('#roomsTable').innerHTML;
-                document.getElementById('roomsTable').innerHTML = newTable;
-              })
-              .catch(error => {
-                message.innerHTML = '<p class="error">Error refreshing rooms list.</p>';
-                console.error(error);
-              });
-          } else {
-            message.innerHTML = '<p class="error">' + data.message + '</p>';
-          }
-        })
-        .catch(error => {
-          message.innerHTML = '<p class="error">Error adding room.</p>';
-          console.error(error);
+            const roomMessage = document.getElementById('roomMessage');
+            if (data.success) {
+                roomMessage.innerHTML = `<p class="success">${data.message}</p>`;
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                roomMessage.innerHTML = `<p class="error">${data.message}</p>`;
+            }
         });
-    }
-  </script>
-</body>
-</html>
+});
+</script>
