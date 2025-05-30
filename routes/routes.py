@@ -356,6 +356,7 @@ def setup_routes(app):
         except sqlite3.Error as e:
             print(f"Database error in check_booking: {e}")
             return jsonify({"already_requested": False, "rejected": False})
+        
 
     @app.route("/student_section/get_rooms", methods=["GET"])
     def get_rooms():

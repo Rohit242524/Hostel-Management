@@ -15,7 +15,7 @@ function loadSection(section) {
         return response.json();
       })
       .then(data => {
-        if (!data) return; // Exit if session expired
+        if (!data) return; 
         if (data.rejected) {
           content.innerHTML = `
             <h2>Book a Room</h2>
@@ -83,7 +83,7 @@ function loadBookingForm() {
       return response.json();
     })
     .then(rooms => {
-      if (!rooms) return; // Exit if session expired
+      if (!rooms) return; 
       if (rooms.length === 0) {
         document.getElementById('mainContent').innerHTML += '<p class="error">No rooms are currently available for booking.</p>';
         return;
@@ -153,7 +153,7 @@ function submitBooking(event) {
       return response.json();
     })
     .then(data => {
-      if (!data) return; // Exit if session expired
+      if (!data) return; 
       if (data.success) {
         message.innerHTML = '<p class="success">Room booking requested! Waiting for admin approval.</p>';
         form.reset();
